@@ -15,6 +15,7 @@ const emptyForm = {
 const AdminPage = ({ products, onAdd, onUpdate, onDelete, categories, formatPrice, authed, onLogin, onLogout }) => {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [creds, setCreds] = useState({ user: '', pass: '' });
 
   const sortedProducts = useMemo(
@@ -44,13 +45,25 @@ const AdminPage = ({ products, onAdd, onUpdate, onDelete, categories, formatPric
       showOnHome: Boolean(form.showOnHome),
     };
 
-    if (editingId) {
-      onUpdate(editingId, payload);
+    const finalize = (img) => {
+      const ready = { ...payload, image: img };
+      if (editingId) {
+        onUpdate(editingId, ready);
+      } else {
+        onAdd(ready);
+      }
+      setForm(emptyForm);
+      setEditingId(null);
+      setImageFile(null);
+    };
+
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onload = () => finalize(reader.result);
+      reader.readAsDataURL(imageFile);
     } else {
-      onAdd(payload);
+      finalize(payload.image);
     }
-    setForm(emptyForm);
-    setEditingId(null);
   };
 
   const startEdit = (product) => {
@@ -65,6 +78,7 @@ const AdminPage = ({ products, onAdd, onUpdate, onDelete, categories, formatPric
       stock: product.stock?.toString() || '',
       showOnHome: product.showOnHome ?? false,
     });
+    setImageFile(null);
   };
 
   const cancelEdit = () => {
@@ -211,13 +225,30 @@ const AdminPage = ({ products, onAdd, onUpdate, onDelete, categories, formatPric
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-stone-500">Image URL</label>
-              <input
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-                className="w-full rounded-xl border border-stone-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
-                placeholder="https://images.unsplash.com/..."
-              />
+              <label className="text-xs uppercase tracking-[0.2em] text-stone-500">Image</label>
+              <div className="flex flex-col gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                />
+                <input
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-stone-900"
+                  placeholder="Or paste image URL"
+                />
+                {(imageFile || form.image) && (
+                  <div className="rounded-xl overflow-hidden border border-stone-200 w-full h-40 bg-stone-100">
+                    <img
+                      src={imageFile ? URL.createObjectURL(imageFile) : form.image}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-2 md:col-span-2">
               <label className="text-xs uppercase tracking-[0.2em] text-stone-500">Description</label>

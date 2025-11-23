@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Plus, CheckCircle2 } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
@@ -13,6 +13,13 @@ import ProductsPage from './pages/ProductsPage';
 import AdminPage from './pages/AdminPage';
 
 import { CATEGORIES, PRODUCTS } from './data/products';
+const REVIEW_KEY = 'mirai_reviews';
+const PRODUCT_KEY = 'mirai_products';
+const defaultReviews = [
+  { id: 1, name: 'Ayu', city: 'Jakarta', rating: 5, text: 'Flavors are balanced and not too sweet. Delivery was fast.', date: '2 days ago' },
+  { id: 2, name: 'Dewi', city: 'Bandung', rating: 4, text: 'The croissants are incredible—please open in Bandung!', date: '1 week ago' },
+  { id: 3, name: 'Michael', city: 'Singapore', rating: 5, text: 'Attention to detail is world-class. Packaging was beautiful.', date: '3 weeks ago' },
+];
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -31,7 +38,12 @@ const HomePage = ({
   selectedCategory,
   setSelectedCategory,
   setActiveProduct,
+  reviews,
+  reviewForm,
+  setReviewForm,
+  onAddReview,
 }) => {
+  const [hoverRating, setHoverRating] = useState(null);
   const filteredProducts = selectedCategory === 'All'
     ? products.filter((p) => p.showOnHome !== false)
     : products.filter((p) => p.category === selectedCategory && p.showOnHome !== false);
@@ -194,6 +206,87 @@ const HomePage = ({
           </div>
         </div>
       </section>
+
+      <section className="py-20 bg-[#FDFBF7]">
+        <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+          <div className="lg:col-span-1">
+            <p className="text-xs uppercase tracking-[0.3em] text-rose-500 mb-3">Reviews</p>
+            <h3 className="font-serif text-3xl text-stone-900 mb-4">What guests say</h3>
+            <p className="text-stone-600 leading-relaxed mb-6">Share your experience with Mirai. We listen to every note to make tomorrow’s batches better.</p>
+            <form onSubmit={onAddReview} className="bg-white border border-stone-200 rounded-2xl p-5 space-y-4 shadow-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  required
+                  value={reviewForm.name}
+                  onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                  placeholder="Name"
+                  className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-stone-900"
+                />
+                <input
+                  value={reviewForm.city}
+                  onChange={(e) => setReviewForm({ ...reviewForm, city: e.target.value })}
+                  placeholder="City"
+                  className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-stone-900"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((r) => {
+                  const active = hoverRating ? r <= hoverRating : r <= reviewForm.rating;
+                  return (
+                    <button
+                      key={r}
+                      type="button"
+                      onMouseEnter={() => setHoverRating(r)}
+                      onMouseLeave={() => setHoverRating(null)}
+                      onClick={() => setReviewForm({ ...reviewForm, rating: r })}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition transform hover:-translate-y-0.5 ${
+                        active ? 'text-amber-500 bg-amber-50 shadow-sm' : 'text-stone-300 bg-white border border-stone-200'
+                      }`}
+                      aria-label={`${r} star`}
+                    >
+                      ★
+                    </button>
+                  );
+                })}
+                <span className="text-xs uppercase tracking-[0.2em] text-stone-500 ml-2">
+                  {hoverRating || reviewForm.rating}/5
+                </span>
+              </div>
+              <textarea
+                required
+                value={reviewForm.text}
+                onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                placeholder="Tell us about your pastry..."
+                rows={3}
+                className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-stone-900"
+              />
+              <button
+                type="submit"
+                className="w-full bg-stone-900 text-white py-3 rounded-xl text-sm uppercase tracking-[0.2em] hover:bg-rose-500 transition-colors"
+              >
+                Submit review
+              </button>
+            </form>
+          </div>
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {reviews.slice(0,6).map((review) => (
+              <div key={review.id} className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-serif text-lg text-stone-900">{review.name}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-stone-500">{review.city}</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-amber-500">
+                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                  </div>
+                </div>
+                <p className="text-stone-600 leading-relaxed text-sm">{review.text}</p>
+                <p className="text-xs text-stone-400">{review.date}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 };
@@ -202,9 +295,17 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [products, setProducts] = useState(() =>
-    PRODUCTS.map((p) => ({ ...p, stock: p.stock ?? 0, showOnHome: p.showOnHome ?? true })),
-  );
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem(PRODUCT_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        localStorage.removeItem(PRODUCT_KEY);
+      }
+    }
+    return PRODUCTS.map((p) => ({ ...p, stock: p.stock ?? 0, showOnHome: p.showOnHome ?? true }));
+  });
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeProduct, setActiveProduct] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -212,8 +313,28 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [adminAuthed, setAdminAuthed] = useState(() => Boolean(localStorage.getItem('mirai_admin_token')));
+  const [reviews, setReviews] = useState(() => {
+    const saved = localStorage.getItem(REVIEW_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        localStorage.removeItem(REVIEW_KEY);
+      }
+    }
+    return defaultReviews;
+  });
   const ADMIN_USER = 'admin';
   const ADMIN_PASS = 'mirai123';
+  const [reviewForm, setReviewForm] = useState({ name: '', city: '', text: '', rating: 5 });
+
+  useEffect(() => {
+    localStorage.setItem(PRODUCT_KEY, JSON.stringify(products));
+  }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem(REVIEW_KEY, JSON.stringify(reviews));
+  }, [reviews]);
 
   const formatPrice = (value) =>
     new Intl.NumberFormat('id-ID', {
@@ -340,6 +461,23 @@ export default function App() {
     pushToast('Product removed');
   };
 
+  const addReview = (e) => {
+    e.preventDefault();
+    const clean = (val) => sanitize(val) || '';
+    if (!reviewForm.name || !reviewForm.text) return;
+    const newReview = {
+      id: Date.now(),
+      name: clean(reviewForm.name),
+      city: clean(reviewForm.city) || 'Guest',
+      rating: Number(reviewForm.rating) || 5,
+      text: clean(reviewForm.text),
+      date: 'Just now',
+    };
+    setReviews((prev) => [newReview, ...prev].slice(0, 20));
+    setReviewForm({ name: '', city: '', text: '', rating: 5 });
+    pushToast('Thanks for your review!');
+  };
+
   const handleLogin = (user, pass) => {
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       localStorage.setItem('mirai_admin_token', 'ok');
@@ -424,6 +562,10 @@ export default function App() {
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
                   setActiveProduct={setActiveProduct}
+                  reviews={reviews}
+                  reviewForm={reviewForm}
+                  setReviewForm={setReviewForm}
+                  onAddReview={addReview}
                 />,
               )}
             />
