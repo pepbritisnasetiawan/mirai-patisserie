@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, ShoppingBag, X } from 'lucide-react';
 
-const Navbar = ({ cartCount, onOpenCart }) => {
+const Navbar = ({ cartCount, onOpenCart, onNavigate }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -15,6 +15,7 @@ const Navbar = ({ cartCount, onOpenCart }) => {
     { label: 'Home', href: '#hero' },
     { label: 'Menu', href: '#menu' },
     { label: 'Story', href: '#story' },
+    { label: 'Products', href: '/products' },
   ];
   const mainColor = scrolled ? 'text-stone-900' : 'text-white';
   const subtleColor = scrolled ? 'text-stone-600 hover:text-stone-900' : 'text-white/80 hover:text-white';
@@ -22,8 +23,7 @@ const Navbar = ({ cartCount, onOpenCart }) => {
 
   const handleNavigate = (href) => {
     setIsMenuOpen(false);
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (onNavigate) onNavigate(href);
   };
 
   return (
