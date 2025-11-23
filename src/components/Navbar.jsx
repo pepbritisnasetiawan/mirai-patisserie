@@ -16,6 +16,7 @@ const Navbar = ({ cartCount, onOpenCart, onNavigate }) => {
     { label: 'Menu', href: '#menu' },
     { label: 'Story', href: '#story' },
     { label: 'Products', href: '/products' },
+    { label: 'Admin', href: '/admin' },
   ];
   const mainColor = scrolled ? 'text-stone-900' : 'text-white';
   const subtleColor = scrolled ? 'text-stone-600 hover:text-stone-900' : 'text-white/80 hover:text-white';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Plus } from 'lucide-react';
+import { Star, Plus, CheckCircle2 } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
@@ -10,8 +10,20 @@ import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import Footer from './components/Footer';
 import ProductsPage from './pages/ProductsPage';
+import AdminPage from './pages/AdminPage';
 
 import { CATEGORIES, PRODUCTS } from './data/products';
+
+const PageTransition = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 24 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -24 }}
+    transition={{ duration: 0.45, ease: 'easeOut' }}
+  >
+    {children}
+  </motion.div>
+);
 
 const HomePage = ({
   products,
@@ -140,6 +152,7 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [cart, setCart] = useState([]);
+  const [toasts, setToasts] = useState([]);
 
   const formatPrice = (value) =>
     new Intl.NumberFormat('id-ID', {
@@ -147,6 +160,14 @@ export default function App() {
       currency: 'IDR',
       maximumFractionDigits: 0,
     }).format(Math.round(value * 1000));
+
+  const pushToast = (message) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2500);
+  };
 
   const addToCart = (product) => {
     setCart((prev) => {
@@ -158,7 +179,7 @@ export default function App() {
       }
       return [...prev, { ...product, quantity: 1, cartId: Date.now() }];
     });
-    setIsCartOpen(true);
+    pushToast(`${product.name} added to bag`);
   };
 
   const removeFromCart = (cartId) => {
@@ -191,36 +212,45 @@ export default function App() {
         id: Date.now(),
       },
     ]);
+    pushToast('Product added');
   };
 
   const updateProduct = (id, updates) => {
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, ...updates, id } : p)),
     );
+    pushToast('Product updated');
   };
 
   const deleteProduct = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
+    pushToast('Product removed');
   };
 
   const handleNavigate = (href) => {
-    if (href.startsWith('/products')) {
-      navigate('/products');
+    if (href.startsWith('/')) {
+      navigate(href);
       return;
     }
 
     if (href.startsWith('#')) {
       if (location.pathname !== '/') {
-        navigate('/' + href);
-        return;
+        navigate('/');
+        setTimeout(() => {
+          const target = document.querySelector(href);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }, 50);
+      } else {
+        const target = document.querySelector(href);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
       }
-      const target = document.querySelector(href);
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
     navigate(href);
   };
+
+  const routeElement = (element) => <PageTransition>{element}</PageTransition>;
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] font-sans selection:bg-rose-200 selection:text-rose-900 overflow-x-hidden">
@@ -254,34 +284,45 @@ export default function App() {
       />
 
       <main>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <HomePage
-                products={products}
-                formatPrice={formatPrice}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                setActiveProduct={setActiveProduct}
-              />
-            }
-          />
-          <Route
-            path="/products"
-            element={
-              <ProductsPage
-                products={products}
-                onAdd={addProduct}
-                onUpdate={updateProduct}
-                onDelete={deleteProduct}
-                onAddToCart={addToCart}
-                formatPrice={formatPrice}
-                categories={CATEGORIES}
-              />
-            }
-          />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route
+              path="/"
+              element={routeElement(
+                <HomePage
+                  products={products}
+                  formatPrice={formatPrice}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  setActiveProduct={setActiveProduct}
+                />,
+              )}
+            />
+            <Route
+              path="/products"
+              element={routeElement(
+                <ProductsPage
+                  products={products}
+                  onAddToCart={addToCart}
+                  formatPrice={formatPrice}
+                />,
+              )}
+            />
+            <Route
+              path="/admin"
+              element={routeElement(
+                <AdminPage
+                  products={products}
+                  onAdd={addProduct}
+                  onUpdate={updateProduct}
+                  onDelete={deleteProduct}
+                  categories={CATEGORIES}
+                  formatPrice={formatPrice}
+                />,
+              )}
+            />
+          </Routes>
+        </AnimatePresence>
       </main>
 
       <Footer />
@@ -315,6 +356,24 @@ export default function App() {
         formatPrice={formatPrice}
         onSubmit={completeOrder}
       />
+
+      <div className="fixed top-4 right-4 z-[120] space-y-2 pointer-events-none">
+        <AnimatePresence>
+          {toasts.map((toast) => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.97 }}
+              transition={{ duration: 0.2 }}
+              className="pointer-events-auto flex items-center gap-3 bg-stone-900 text-white px-4 py-3 rounded-xl shadow-lg shadow-stone-900/20 border border-stone-700"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+              <span className="text-sm">{toast.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
