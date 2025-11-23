@@ -30,10 +30,10 @@ const Hero = () => {
 
   useEffect(() => {
     const id = setInterval(() => {
-      goNext();
+      setHeroIndex((prev) => (prev + 1) % heroImages.length);
     }, 6000);
     return () => clearInterval(id);
-  }, [heroImages.length]); // Added dependency to be safe
+  }, [heroImages.length]);
 
   return (
     <section id="hero" className="relative h-screen min-h-[700px] overflow-hidden flex items-center justify-center bg-stone-900">

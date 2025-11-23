@@ -23,6 +23,23 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit }) => {
     setTimeout(() => {
       setStatus('success');
       setTimeout(() => {
+        const phoneTarget = '+62895335587822';
+        const lines = [
+          'Halo Mirai, saya ingin memesan:',
+          ...items.map(
+            (item) =>
+              `- ${item.name} x${item.quantity} (${formatPrice(item.price * item.quantity)})`,
+          ),
+          `Total: ${formatPrice(total)}`,
+          '',
+          `Nama: ${form.name}`,
+          `Telepon: ${form.phone}`,
+          form.email ? `Email: ${form.email}` : null,
+          form.note ? `Catatan: ${form.note}` : null,
+        ].filter(Boolean);
+
+        const whatsappUrl = `https://wa.me/${phoneTarget}?text=${encodeURIComponent(lines.join('\n'))}`;
+        window.open(whatsappUrl, '_blank');
         onSubmit?.(form);
         onClose();
       }, 1000);

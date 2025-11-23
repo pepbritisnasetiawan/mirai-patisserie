@@ -65,6 +65,7 @@ export default function App() {
 
   const completeOrder = () => {
     setCart([]);
+    setIsCheckoutOpen(false);
   };
 
   return (
@@ -171,7 +172,7 @@ export default function App() {
            <div className="container mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
               <div className="w-full md:w-1/2">
                 <img 
-                  src="https://images.unsplash.com/photo-1612203985729-70726954388c?q=80&w=1000&auto=format&fit=crop" 
+                  src="https://images.unsplash.com/photo-1582650947299-4655dd1a4683?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                   alt="Baker Hands" 
                   className="rounded-3xl shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700"
                 />
