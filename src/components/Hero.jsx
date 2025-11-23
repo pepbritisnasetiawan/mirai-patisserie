@@ -82,7 +82,7 @@ const Hero = () => {
           transition={{ duration: 0.8, ease: "easeInOut", delay: 0.5 }}
         >
           <span className="inline-block py-1 px-3 border border-white/30 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs tracking-[0.2em] uppercase mb-6">
-            Tokyo • Paris • New York
+            Wonosobo • Jogja • Jakarta
           </span>
           <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-[1.1]">
             The Art of <br/>
