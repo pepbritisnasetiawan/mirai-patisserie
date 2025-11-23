@@ -23,7 +23,7 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit }) => {
     setTimeout(() => {
       setStatus('success');
       setTimeout(() => {
-        const phoneTarget = '+62895335587822';
+        const phoneTarget = '+62895404922012';
         const lines = [
           'Halo Mirai, saya ingin memesan:',
           ...items.map(

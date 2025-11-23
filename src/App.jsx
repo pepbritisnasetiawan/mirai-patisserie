@@ -167,7 +167,7 @@ const HomePage = ({
           </div>
           <div className="flex md:justify-end">
             <a
-              href="https://wa.me/6285555555"
+              href="https://wa.me/+62895404922012"
               target="_blank"
               rel="noreferrer noopener"
               className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors text-sm uppercase tracking-[0.2em]"
