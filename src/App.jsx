@@ -35,6 +35,12 @@ const HomePage = ({
   const filteredProducts = selectedCategory === 'All'
     ? products.filter((p) => p.showOnHome !== false)
     : products.filter((p) => p.category === selectedCategory && p.showOnHome !== false);
+  const displayedProducts =
+    selectedCategory === 'All'
+      ? filteredProducts.slice(0, 12)
+      : filteredProducts.length > 4
+        ? filteredProducts.slice(0, 4)
+        : filteredProducts;
 
   return (
     <>
@@ -68,10 +74,13 @@ const HomePage = ({
 
         <motion.div
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 md:gap-12"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10"
         >
           <AnimatePresence>
-            {filteredProducts.map((product) => (
+            {displayedProducts.map((product) => {
+              const remaining = product.stock ?? 0;
+              const isSoldOut = remaining <= 0;
+              return (
               <motion.div
                 layout
                 initial={{ opacity: 0, y: 20 }}
@@ -79,7 +88,7 @@ const HomePage = ({
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.4 }}
                 key={product.id}
-                className="group cursor-pointer"
+                className={`group cursor-pointer ${isSoldOut ? 'opacity-70' : ''}`}
                 onClick={() => setActiveProduct(product)}
               >
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-6 bg-stone-200">
@@ -90,9 +99,23 @@ const HomePage = ({
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
 
-                  <button className="absolute bottom-4 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg text-stone-900 hover:bg-stone-900 hover:text-white">
-                    <Plus className="w-5 h-5" />
-                  </button>
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 text-xs rounded-full bg-white/80 text-stone-800">
+                      {remaining > 0 ? `${remaining} left` : 'Sold out'}
+                    </span>
+                  </div>
+
+                  {isSoldOut && (
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center text-white font-semibold tracking-[0.2em] uppercase">
+                      Sold Out
+                    </div>
+                  )}
+
+                  {!isSoldOut && (
+                    <button className="absolute bottom-4 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg text-stone-900 hover:bg-stone-900 hover:text-white">
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex justify-between items-baseline mb-1">
@@ -103,19 +126,45 @@ const HomePage = ({
                 </div>
                 <p className="text-stone-500 text-sm line-clamp-2 font-light">{product.description}</p>
               </motion.div>
-            ))}
+            )})}
           </AnimatePresence>
         </motion.div>
 
-        <div className="flex justify-center mt-12">
+        <div className="flex justify-center mt-10">
           <a
             href="/products"
-            className="px-6 py-3 rounded-full border border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white transition-colors uppercase tracking-[0.2em] text-sm"
+            className="px-8 py-3 rounded-full border border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white transition-colors uppercase tracking-[0.2em] text-sm shadow-sm"
           >
             View all products
           </a>
         </div>
       </div>
+
+      <section className="py-16 bg-white relative z-10">
+        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-rose-500 mb-3">Need something custom?</p>
+            <h3 className="font-serif text-3xl md:text-4xl text-stone-900 mb-4">Call us via WhatsApp</h3>
+            <p className="text-stone-600 leading-relaxed mb-6">
+              Have a rush order, an event, or need allergen info? Message us directly and our pastry concierge will help finalize your order.
+            </p>
+            <div className="flex items-center gap-3 text-sm text-stone-700">
+              <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs uppercase tracking-[0.2em]">Fast</span>
+              <span className="px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-xs uppercase tracking-[0.2em]">Human support</span>
+            </div>
+          </div>
+          <div className="flex md:justify-end">
+            <a
+              href="https://wa.me/6285555555"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors text-sm uppercase tracking-[0.2em]"
+            >
+              Chat on WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
 
       <section id="story" className="py-24 bg-stone-100 relative z-10 overflow-hidden">
         <div className="container mx-auto px-6 flex flex-col md:flex-row items-center gap-16">

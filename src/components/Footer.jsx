@@ -12,7 +12,7 @@ const Footer = () => (
       </div>
       <div>
         <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-6">Visit Us</h3>
-        <p className="text-stone-300 font-light mb-2">Wadaslintang Vilalage</p>
+        <p className="text-stone-300 font-light mb-2">Wadaslintang</p>
         <p className="text-stone-300 font-light mb-2">Wonosobo</p>
         <p className="text-stone-500 text-sm mt-4">Open Daily 8am - 7pm</p>
       </div>
