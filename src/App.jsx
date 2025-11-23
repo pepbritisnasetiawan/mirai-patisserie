@@ -33,8 +33,8 @@ const HomePage = ({
   setActiveProduct,
 }) => {
   const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter((p) => p.category === selectedCategory);
+    ? products.filter((p) => p.showOnHome !== false)
+    : products.filter((p) => p.category === selectedCategory && p.showOnHome !== false);
 
   return (
     <>
@@ -68,7 +68,7 @@ const HomePage = ({
 
         <motion.div
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 md:gap-12"
         >
           <AnimatePresence>
             {filteredProducts.map((product) => (
@@ -106,6 +106,15 @@ const HomePage = ({
             ))}
           </AnimatePresence>
         </motion.div>
+
+        <div className="flex justify-center mt-12">
+          <a
+            href="/products"
+            className="px-6 py-3 rounded-full border border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white transition-colors uppercase tracking-[0.2em] text-sm"
+          >
+            View all products
+          </a>
+        </div>
       </div>
 
       <section id="story" className="py-24 bg-stone-100 relative z-10 overflow-hidden">
@@ -145,7 +154,7 @@ export default function App() {
   const location = useLocation();
 
   const [products, setProducts] = useState(() =>
-    PRODUCTS.map((p) => ({ ...p, stock: p.stock ?? 0 })),
+    PRODUCTS.map((p) => ({ ...p, stock: p.stock ?? 0, showOnHome: p.showOnHome ?? true })),
   );
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeProduct, setActiveProduct] = useState(null);
@@ -153,6 +162,9 @@ export default function App() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [cart, setCart] = useState([]);
   const [toasts, setToasts] = useState([]);
+  const [adminAuthed, setAdminAuthed] = useState(() => Boolean(localStorage.getItem('mirai_admin_token')));
+  const ADMIN_USER = 'admin';
+  const ADMIN_PASS = 'mirai123';
 
   const formatPrice = (value) =>
     new Intl.NumberFormat('id-ID', {
@@ -160,6 +172,14 @@ export default function App() {
       currency: 'IDR',
       maximumFractionDigits: 0,
     }).format(Math.round(value * 1000));
+
+  const sanitize = (val) => (typeof val === 'string' ? val.replace(/[<>]/g, '').trim() : val);
+
+  const adjustStock = (productId, delta) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, stock: Math.max(0, (p.stock ?? 0) + delta) } : p)),
+    );
+  };
 
   const pushToast = (message) => {
     const id = Date.now();
@@ -170,6 +190,12 @@ export default function App() {
   };
 
   const addToCart = (product) => {
+    const current = products.find((p) => p.id === product.id);
+    const available = current ? current.stock ?? 0 : 0;
+    if (available <= 0) {
+      pushToast(`${product.name} is out of stock`);
+      return;
+    }
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -179,18 +205,36 @@ export default function App() {
       }
       return [...prev, { ...product, quantity: 1, cartId: Date.now() }];
     });
+    adjustStock(product.id, -1);
     pushToast(`${product.name} added to bag`);
   };
 
   const removeFromCart = (cartId) => {
-    setCart((prev) => prev.filter((item) => item.cartId !== cartId));
+    setCart((prev) => {
+      const item = prev.find((i) => i.cartId === cartId);
+      if (item) adjustStock(item.id, item.quantity);
+      return prev.filter((i) => i.cartId !== cartId);
+    });
   };
 
   const updateQuantity = (cartId, newQty) => {
-    if (newQty < 1) return removeFromCart(cartId);
-    setCart((prev) =>
-      prev.map((item) => (item.cartId === cartId ? { ...item, quantity: newQty } : item)),
-    );
+    setCart((prev) => {
+      const item = prev.find((i) => i.cartId === cartId);
+      if (!item) return prev;
+      if (newQty < 1) {
+        adjustStock(item.id, item.quantity);
+        return prev.filter((i) => i.cartId !== cartId);
+      }
+      const delta = newQty - item.quantity;
+      const product = products.find((p) => p.id === item.id);
+      const available = product ? product.stock ?? 0 : 0;
+      if (delta > 0 && available < delta) {
+        pushToast('Not enough stock');
+        return prev;
+      }
+      if (delta !== 0) adjustStock(item.id, -delta);
+      return prev.map((i) => (i.cartId === cartId ? { ...i, quantity: newQty } : i));
+    });
   };
 
   const openCheckout = () => {
@@ -205,19 +249,39 @@ export default function App() {
   };
 
   const addProduct = (newProduct) => {
+    const payload = {
+      ...newProduct,
+      name: sanitize(newProduct.name),
+      category: sanitize(newProduct.category),
+      description: sanitize(newProduct.description),
+      ingredients: sanitize(newProduct.ingredients),
+      image: sanitize(newProduct.image),
+      showOnHome: Boolean(newProduct.showOnHome),
+    };
+
     setProducts((prev) => [
       ...prev,
       {
-        ...newProduct,
+        ...payload,
         id: Date.now(),
+        showOnHome: payload.showOnHome ?? false,
       },
     ]);
     pushToast('Product added');
   };
 
   const updateProduct = (id, updates) => {
+    const payload = {
+      ...updates,
+      name: sanitize(updates.name),
+      category: sanitize(updates.category),
+      description: sanitize(updates.description),
+      ingredients: sanitize(updates.ingredients),
+      image: sanitize(updates.image),
+      showOnHome: Boolean(updates.showOnHome),
+    };
     setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates, id } : p)),
+      prev.map((p) => (p.id === id ? { ...p, ...payload, id } : p)),
     );
     pushToast('Product updated');
   };
@@ -225,6 +289,22 @@ export default function App() {
   const deleteProduct = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
     pushToast('Product removed');
+  };
+
+  const handleLogin = (user, pass) => {
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      localStorage.setItem('mirai_admin_token', 'ok');
+      setAdminAuthed(true);
+      pushToast('Admin logged in');
+    } else {
+      pushToast('Invalid credentials');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('mirai_admin_token');
+    setAdminAuthed(false);
+    pushToast('Logged out');
   };
 
   const handleNavigate = (href) => {
@@ -318,6 +398,9 @@ export default function App() {
                   onDelete={deleteProduct}
                   categories={CATEGORIES}
                   formatPrice={formatPrice}
+                  authed={adminAuthed}
+                  onLogin={handleLogin}
+                  onLogout={handleLogout}
                 />,
               )}
             />

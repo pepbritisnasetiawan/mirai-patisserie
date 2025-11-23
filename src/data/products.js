@@ -11,7 +11,8 @@ export const PRODUCTS = [
     image: "https://cdn.shopify.com/s/files/1/1456/8506/files/matchaonomu_-_yuzu_matcha_sponge_cake_2_600x600.jpg?v=1745019215",
     accent: "bg-lime-100 text-lime-800",
     badges: ["Best Seller", "GF"],
-    stock: 12
+    stock: 12,
+    showOnHome: true,
   },
   {
     id: 2,
@@ -23,7 +24,8 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1606209005463-5718385da56b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     accent: "bg-stone-200 text-stone-800",
     badges: ["Signature"],
-    stock: 15
+    stock: 15,
+    showOnHome: true,
   },
   {
     id: 3,
@@ -35,7 +37,8 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?q=80&w=1000&auto=format&fit=crop",
     accent: "bg-rose-100 text-rose-800",
     badges: [],
-    stock: 10
+    stock: 10,
+    showOnHome: true,
   },
   {
     id: 4,
@@ -47,7 +50,8 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1600521853186-93b88b3a07b0?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     accent: "bg-orange-100 text-orange-800",
     badges: ["Morning Only"],
-    stock: 30
+    stock: 30,
+    showOnHome: true,
   },
   {
     id: 5,
@@ -59,7 +63,8 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?q=80&w=1000&auto=format&fit=crop",
     accent: "bg-emerald-100 text-emerald-800",
     badges: [],
-    stock: 18
+    stock: 18,
+    showOnHome: true,
   },
   {
     id: 6,
@@ -71,6 +76,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1744160252982-3090a97bb6cb?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     accent: "bg-blue-50 text-blue-800",
     badges: ["Gift Ready"],
-    stock: 25
+    stock: 25,
+    showOnHome: true,
   }
 ];
