@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Loader2, CheckCircle2 } from 'lucide-react';
 
@@ -46,6 +46,17 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit, whatsapp
     }, 800);
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+    return undefined;
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -64,19 +75,19 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit, whatsapp
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 30, opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed inset-0 md:inset-12 lg:inset-20 z-[90] flex items-center justify-center p-4"
+            className="fixed inset-0 md:inset-12 lg:inset-20 z-[90] flex items-center justify-center p-3 md:p-4"
           >
-            <div className="bg-[#FDFBF7] w-full max-w-5xl h-full md:h-auto md:max-h-full overflow-y-auto rounded-[2rem] shadow-2xl relative">
+            <div className="bg-[#FDFBF7] w-full max-w-5xl h-full md:h-auto md:max-h-full overflow-y-auto rounded-[1.5rem] md:rounded-[2rem] shadow-2xl relative">
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100"
+                className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-full hover:bg-stone-100"
                 aria-label="Close checkout"
               >
                 <X className="w-5 h-5 text-stone-700" />
               </button>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-10">
-                <div className="p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-stone-200">
+                <div className="p-6 md:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-stone-200">
                   <h3 className="font-serif text-3xl text-stone-900 mb-4">Checkout</h3>
                   <p className="text-stone-500 mb-8">Confirm your details and preferred contact. We will reach out to finalize pickup or delivery.</p>
 
@@ -92,7 +103,7 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit, whatsapp
                         placeholder="Your name"
                       />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-2">
                         <label className="text-xs uppercase tracking-[0.2em] text-stone-500">Phone</label>
                         <input

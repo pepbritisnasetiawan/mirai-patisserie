@@ -638,15 +638,16 @@ export default function App() {
               )}
             />
             <Route
-              path="/products"
-              element={routeElement(
-                <ProductsPage
-                  products={products}
-                  onAddToCart={addToCart}
-                  formatPrice={formatPrice}
-                />,
-              )}
-            />
+            path="/products"
+            element={routeElement(
+              <ProductsPage
+                products={products}
+                onAddToCart={addToCart}
+                formatPrice={formatPrice}
+                categories={CATEGORIES}
+              />,
+            )}
+          />
             <Route
               path="/admin"
               element={routeElement(
