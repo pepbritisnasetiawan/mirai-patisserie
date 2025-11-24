@@ -76,6 +76,8 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit, whatsapp
             exit={{ y: 30, opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
             className="fixed inset-0 md:inset-12 lg:inset-20 z-[90] flex items-center justify-center p-3 md:p-4"
+            role="dialog"
+            aria-modal="true"
           >
             <div className="bg-[#FDFBF7] w-full max-w-5xl h-full md:h-auto md:max-h-full overflow-y-auto rounded-[1.5rem] md:rounded-[2rem] shadow-2xl relative">
               <button

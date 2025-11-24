@@ -30,6 +30,21 @@ const defaultReviews = [
   { id: 2, name: 'Dewi', city: 'Bandung', rating: 4, text: 'The croissants are incredible—please open in Bandung!', date: '1 week ago' },
   { id: 3, name: 'Michael', city: 'Singapore', rating: 5, text: 'Attention to detail is world-class. Packaging was beautiful.', date: '3 weeks ago' },
 ];
+const DEFAULT_ACCENT = 'bg-stone-200 text-stone-700';
+
+const normalizeProduct = (p) => ({
+  id: p.id,
+  name: p.name,
+  category: p.category,
+  price: typeof p.price === 'number' ? p.price : Number(p.price) || 0,
+  description: p.description || '',
+  ingredients: p.ingredients || '',
+  image: p.image || '',
+  stock: typeof p.stock === 'number' ? p.stock : Number(p.stock) || 0,
+  showOnHome: typeof p.showOnHome === 'boolean' ? p.showOnHome : Boolean(p.show_on_home),
+  accent: p.accent || DEFAULT_ACCENT,
+  badges: p.badges || [],
+});
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -52,6 +67,8 @@ const HomePage = ({
   reviewForm,
   setReviewForm,
   onAddReview,
+  loadingData,
+  loadError,
 }) => {
   const [hoverRating, setHoverRating] = useState(null);
   const filteredProducts = selectedCategory === 'All'
@@ -69,6 +86,12 @@ const HomePage = ({
       <Hero />
 
       <div id="menu" className="container mx-auto px-6 py-24 relative z-10">
+        {(loadingData || loadError) && (
+          <div className="mb-6 text-sm">
+            {loadingData && <span className="text-stone-500">Syncing latest menu…</span>}
+            {loadError && <span className="text-amber-600">{loadError}</span>}
+          </div>
+        )}
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-xl">
             <span className="text-rose-500 font-medium tracking-widest text-xs uppercase mb-4 block">Our Collection</span>
@@ -315,12 +338,12 @@ export default function App() {
     const saved = localStorage.getItem(PRODUCT_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        return JSON.parse(saved).map(normalizeProduct);
       } catch {
         localStorage.removeItem(PRODUCT_KEY);
       }
     }
-    return PRODUCTS.map((p) => ({ ...p, stock: p.stock ?? 0, showOnHome: p.showOnHome ?? true }));
+    return PRODUCTS.map((p) => normalizeProduct({ ...p, showOnHome: p.showOnHome ?? true }));
   });
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeProduct, setActiveProduct] = useState(null);
@@ -345,6 +368,8 @@ export default function App() {
   const [reviewForm, setReviewForm] = useState({ name: '', city: '', text: '', rating: 5 });
   const [adminToken, setAdminToken] = useState(() => localStorage.getItem('mirai_admin_token') || '');
   const apiReady = Boolean(import.meta.env.VITE_API_BASE);
+  const [loadingData, setLoadingData] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     localStorage.setItem(PRODUCT_KEY, JSON.stringify(products));
@@ -454,12 +479,13 @@ export default function App() {
 
     if (apiReady && (adminToken || adminAuthed)) {
       apiCreateProduct(payload, adminToken || localStorage.getItem('mirai_admin_token'))
-        .then((res) => saveLocal({ ...res }))
+        .then((res) => saveLocal(normalizeProduct(res)))
         .catch(() => {
           saveLocal({
             ...payload,
             id: Date.now(),
             showOnHome: payload.showOnHome ?? false,
+            accent: payload.accent || DEFAULT_ACCENT,
           });
         });
     } else {
@@ -467,6 +493,7 @@ export default function App() {
         ...payload,
         id: Date.now(),
         showOnHome: payload.showOnHome ?? false,
+        accent: payload.accent || DEFAULT_ACCENT,
       });
     }
   };
@@ -480,6 +507,7 @@ export default function App() {
       ingredients: sanitize(updates.ingredients),
       image: sanitize(updates.image),
       showOnHome: Boolean(updates.showOnHome),
+      accent: updates.accent || DEFAULT_ACCENT,
     };
     const applyLocal = () => {
       setProducts((prev) =>
@@ -558,15 +586,20 @@ export default function App() {
     pushToast('Logged out');
   };
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!apiReady) return;
-    fetchProducts()
-      .then((data) => setProducts(data))
-      .catch(() => {});
-    fetchReviews()
-      .then((data) => setReviews(data))
-      .catch(() => {});
+    setLoadingData(true);
+    setLoadError('');
+    Promise.all([fetchProducts(), fetchReviews()])
+      .then(([productsData, reviewsData]) => {
+        setProducts(productsData.map(normalizeProduct));
+        setReviews(reviewsData);
+      })
+      .catch(() => setLoadError('Failed to sync with server. Showing local data.'))
+      .finally(() => setLoadingData(false));
   }, [apiReady]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleNavigate = (href) => {
     if (href.startsWith('/')) {
@@ -652,6 +685,8 @@ export default function App() {
                 formatPrice={formatPrice}
                 categories={CATEGORIES}
                 setActiveProduct={setActiveProduct}
+                loadingData={loadingData}
+                loadError={loadError}
               />,
             )}
           />
@@ -708,16 +743,16 @@ export default function App() {
         whatsappNumber={APP_CONFIG.whatsappNumber}
       />
 
-      <div className="fixed top-4 right-4 z-[120] space-y-2 pointer-events-none">
+      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[250] space-y-3 pointer-events-none w-full max-w-xl px-4">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.97 }}
-              transition={{ duration: 0.2 }}
-              className="pointer-events-auto flex items-center gap-3 bg-stone-900 text-white px-4 py-3 rounded-xl shadow-lg shadow-stone-900/20 border border-stone-700"
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="pointer-events-auto flex items-center gap-3 bg-stone-900/95 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-stone-900/30 border border-stone-700/40 backdrop-blur-xl"
             >
               <CheckCircle2 className="w-4 h-4 text-emerald-300" />
               <span className="text-sm">{toast.message}</span>

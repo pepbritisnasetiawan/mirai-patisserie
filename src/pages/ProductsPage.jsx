@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiveProduct }) => {
+const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiveProduct, loadingData, loadError }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [hideSoldOut, setHideSoldOut] = useState(false);
 
@@ -54,6 +54,12 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiv
       </div>
 
       <div className="container mx-auto px-6 py-12">
+        {(loadingData || loadError) && (
+          <div className="mb-4 text-sm">
+            {loadingData && <span className="text-stone-500">Syncing catalogue…</span>}
+            {loadError && <span className="text-amber-600">{loadError}</span>}
+          </div>
+        )}
         {filteredProducts.length === 0 ? (
           <p className="text-center text-stone-500">No products match this category.</p>
         ) : (

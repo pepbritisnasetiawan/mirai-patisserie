@@ -16,7 +16,7 @@ const ProductModal = ({ product, onClose, onAddToCart, formatPrice }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
         {/* Backdrop with Blur */}
         <motion.div 
           key="backdrop"
