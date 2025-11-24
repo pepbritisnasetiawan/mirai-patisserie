@@ -96,7 +96,7 @@ const HomePage = ({
 
         <motion.div
           layout
-          className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-10"
+          className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 xl:gap-10"
         >
           <AnimatePresence>
             {displayedProducts.map((product) => {
@@ -113,17 +113,23 @@ const HomePage = ({
                 className={`group cursor-pointer ${isSoldOut ? 'opacity-70' : ''}`}
                 onClick={() => setActiveProduct(product)}
               >
-                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-6 bg-stone-200">
+                <div className="relative aspect-[4/5] min-[400px]:aspect-[4/5] sm:aspect-[4/5] md:aspect-[4/5] overflow-hidden rounded-2xl mb-5 sm:mb-6 bg-stone-200">
                   <img
                     src={product.image}
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent group-hover:bg-black/15 transition-colors duration-500" />
 
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 flex flex-col gap-2">
                     <span className="px-3 py-1 text-xs rounded-full bg-white/80 text-stone-800">
                       {remaining > 0 ? `${remaining} left` : 'Sold out'}
+                    </span>
+                    <span className={`px-3 py-1 text-[11px] rounded-full bg-white/80 ${product.accent}`}>
+                      {product.category}
+                    </span>
+                    <span className="px-3 py-1 text-[11px] rounded-full bg-white/70 text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                      View details
                     </span>
                   </div>
 
@@ -140,13 +146,13 @@ const HomePage = ({
                   )}
                 </div>
 
-                <div className="flex justify-between items-baseline mb-1">
-                  <h4 className="font-serif text-xl md:text-2xl text-stone-900 group-hover:text-rose-500 transition-colors">
+                <div className="flex justify-between items-baseline max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1 mb-1">
+                  <h4 className="font-serif text-lg sm:text-xl lg:text-2xl text-stone-900 group-hover:text-rose-500 transition-colors">
                     {product.name}
                   </h4>
-                  <span className="font-medium text-stone-600">{formatPrice(product.price)}</span>
+                  <span className="font-medium text-stone-600 max-[425px]:text-sm">{formatPrice(product.price)}</span>
                 </div>
-                <p className="text-stone-500 text-sm line-clamp-2 font-light">{product.description}</p>
+                <p className="text-stone-500 text-xs sm:text-sm line-clamp-2 font-light">{product.description}</p>
               </motion.div>
             )})}
           </AnimatePresence>

@@ -57,7 +57,7 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiv
         {filteredProducts.length === 0 ? (
           <p className="text-center text-stone-500">No products match this category.</p>
         ) : (
-          <motion.div layout className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <motion.div layout className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <AnimatePresence>
               {filteredProducts.map((product) => {
                 const soldOut = (product.stock ?? 0) <= 0;
@@ -72,7 +72,7 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiv
                     onClick={() => setActiveProduct?.(product)}
                     className="group bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col cursor-pointer"
                   >
-                    <div className="relative aspect-[4/5] sm:aspect-[4/3] overflow-hidden">
+                    <div className="relative aspect-[4/5] sm:aspect-[4/4] lg:aspect-[4/3] overflow-hidden">
                       <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       <div className="absolute top-3 left-3 flex flex-col gap-2">
                         <span className={`px-3 py-1 text-xs rounded-full bg-white/80 backdrop-blur ${product.accent}`}>{product.category}</span>
@@ -84,15 +84,20 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiv
                         </span>
                       </div>
                     </div>
-                    <div className="p-5 flex-1 flex flex-col gap-2">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="font-serif text-xl text-stone-900">{product.name}</h3>
+                    <div className="p-4 sm:p-5 flex-1 flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-3 max-[425px]:flex-col max-[425px]:items-start">
+                        <div className="space-y-1">
+                          <h3 className="font-serif text-lg sm:text-xl text-stone-900 leading-tight">{product.name}</h3>
                           <p className="text-sm text-stone-500 line-clamp-2">{product.description}</p>
                         </div>
-                        <span className="text-sm font-medium text-stone-700">{formatPrice(product.price)}</span>
+                        <span className="text-sm font-semibold text-stone-800 whitespace-nowrap max-[425px]:text-base">{formatPrice(product.price)}</span>
                       </div>
-                      <p className="text-xs text-stone-400">Stock: {product.stock ?? 0}</p>
+                      <div className="flex items-center gap-2 text-xs text-stone-500">
+                        <span className="px-2 py-1 rounded-full bg-stone-100 text-stone-700">{product.category}</span>
+                        <span className="px-2 py-1 rounded-full bg-stone-50 border border-stone-200">
+                          Stock: {product.stock ?? 0}
+                        </span>
+                      </div>
                       <div className="flex gap-2 mt-auto">
                         <button
                           onClick={(e) => {
