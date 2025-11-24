@@ -11,6 +11,17 @@ const Navbar = ({ cartCount, onOpenCart, onNavigate }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (isMenuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+    return undefined;
+  }, [isMenuOpen]);
+
   const navLinks = [
     { label: 'Home', href: '#hero' },
     { label: 'Menu', href: '#menu' },
@@ -71,7 +82,7 @@ const Navbar = ({ cartCount, onOpenCart, onNavigate }) => {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsMenuOpen(false)}
       />
       <div
