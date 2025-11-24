@@ -13,6 +13,15 @@ import ProductsPage from './pages/ProductsPage';
 import AdminPage from './pages/AdminPage';
 
 import { CATEGORIES, PRODUCTS } from './data/products';
+import {
+  fetchProducts,
+  fetchReviews,
+  createProduct as apiCreateProduct,
+  updateProduct as apiUpdateProduct,
+  deleteProduct as apiDeleteProduct,
+  createReview as apiCreateReview,
+  login as apiLogin,
+} from './lib/api';
 const REVIEW_KEY = 'mirai_reviews';
 const PRODUCT_KEY = 'mirai_products';
 const defaultReviews = [
@@ -327,6 +336,8 @@ export default function App() {
   const ADMIN_USER = 'admin';
   const ADMIN_PASS = 'mirai123';
   const [reviewForm, setReviewForm] = useState({ name: '', city: '', text: '', rating: 5 });
+  const [adminToken, setAdminToken] = useState(() => localStorage.getItem('mirai_admin_token') || '');
+  const apiReady = Boolean(import.meta.env.VITE_API_BASE);
 
   useEffect(() => {
     localStorage.setItem(PRODUCT_KEY, JSON.stringify(products));
@@ -429,15 +440,28 @@ export default function App() {
       showOnHome: Boolean(newProduct.showOnHome),
     };
 
-    setProducts((prev) => [
-      ...prev,
-      {
+    const saveLocal = (saved) => {
+      setProducts((prev) => [...prev, saved]);
+      pushToast('Product added');
+    };
+
+    if (apiReady && adminToken) {
+      apiCreateProduct(payload, adminToken)
+        .then((res) => saveLocal({ ...res }))
+        .catch(() => {
+          saveLocal({
+            ...payload,
+            id: Date.now(),
+            showOnHome: payload.showOnHome ?? false,
+          });
+        });
+    } else {
+      saveLocal({
         ...payload,
         id: Date.now(),
         showOnHome: payload.showOnHome ?? false,
-      },
-    ]);
-    pushToast('Product added');
+      });
+    }
   };
 
   const updateProduct = (id, updates) => {
@@ -450,15 +474,29 @@ export default function App() {
       image: sanitize(updates.image),
       showOnHome: Boolean(updates.showOnHome),
     };
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...payload, id } : p)),
-    );
-    pushToast('Product updated');
+    const applyLocal = () => {
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, ...payload, id } : p)),
+      );
+      pushToast('Product updated');
+    };
+    if (apiReady && adminToken) {
+      apiUpdateProduct(id, payload, adminToken).then(applyLocal).catch(applyLocal);
+    } else {
+      applyLocal();
+    }
   };
 
   const deleteProduct = (id) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-    pushToast('Product removed');
+    const applyLocal = () => {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      pushToast('Product removed');
+    };
+    if (apiReady && adminToken) {
+      apiDeleteProduct(id, adminToken).then(applyLocal).catch(applyLocal);
+    } else {
+      applyLocal();
+    }
   };
 
   const addReview = (e) => {
@@ -473,9 +511,16 @@ export default function App() {
       text: clean(reviewForm.text),
       date: 'Just now',
     };
-    setReviews((prev) => [newReview, ...prev].slice(0, 20));
-    setReviewForm({ name: '', city: '', text: '', rating: 5 });
-    pushToast('Thanks for your review!');
+    const applyLocal = () => {
+      setReviews((prev) => [newReview, ...prev].slice(0, 20));
+      setReviewForm({ name: '', city: '', text: '', rating: 5 });
+      pushToast('Thanks for your review!');
+    };
+    if (apiReady) {
+      apiCreateReview(newReview).then(applyLocal).catch(applyLocal);
+    } else {
+      applyLocal();
+    }
   };
 
   const handleLogin = (user, pass) => {
@@ -483,6 +528,17 @@ export default function App() {
       localStorage.setItem('mirai_admin_token', 'ok');
       setAdminAuthed(true);
       pushToast('Admin logged in');
+      return;
+    }
+    if (apiReady) {
+      apiLogin(user, pass)
+        .then((res) => {
+          localStorage.setItem('mirai_admin_token', res.token);
+          setAdminToken(res.token);
+          setAdminAuthed(true);
+          pushToast('Admin logged in');
+        })
+        .catch(() => pushToast('Invalid credentials'));
     } else {
       pushToast('Invalid credentials');
     }
@@ -490,9 +546,20 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('mirai_admin_token');
+    setAdminToken('');
     setAdminAuthed(false);
     pushToast('Logged out');
   };
+
+  useEffect(() => {
+    if (!apiReady) return;
+    fetchProducts()
+      .then((data) => setProducts(data))
+      .catch(() => {});
+    fetchReviews()
+      .then((data) => setReviews(data))
+      .catch(() => {});
+  }, [apiReady]);
 
   const handleNavigate = (href) => {
     if (href.startsWith('/')) {
