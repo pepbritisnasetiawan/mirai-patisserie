@@ -23,7 +23,8 @@ const ProductModal = ({ product, onClose, onAddToCart, formatPrice }) => {
         <div className="bg-[#FDFBF7] w-full max-w-5xl h-auto max-h-[90vh] overflow-y-auto rounded-2xl md:rounded-[2rem] shadow-2xl flex flex-col md:flex-row pointer-events-auto relative scrollbar-hide">
           <button 
             onClick={onClose}
-            className="absolute top-3 right-3 md:top-5 md:right-5 z-20 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white shadow-sm transition-all hover:scale-105"
+            className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-11 h-11 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full hover:bg-white shadow-md transition-all hover:scale-105 active:scale-100"
+            aria-label="Close"
           >
             <X className="w-5 h-5 text-stone-800" />
           </button>
