@@ -39,7 +39,7 @@ const Navbar = ({ cartCount, onOpenCart, onNavigate }) => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${scrolled ? 'py-4 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-stone-200/50' : 'py-8 bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-[150] transition-all duration-500 ease-in-out ${scrolled ? 'py-4 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-stone-200/50' : 'py-8 bg-transparent'}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
         <div className="flex items-center gap-6">
           <button
@@ -80,13 +80,17 @@ const Navbar = ({ cartCount, onOpenCart, onNavigate }) => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[155] bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsMenuOpen(false)}
       />
+      
+      {/* Mobile Menu Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-72 bg-[#FDFBF7] border-r border-stone-200 z-[60] p-6 space-y-8 transform transition-transform duration-300 md:hidden ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        // Added 'bg-white' as a safety class and inline style for specific color
+        style={{ backgroundColor: '#FDFBF7' }} 
+        className={`fixed top-0 left-0 h-screen w-72 bg-white border-r border-stone-200 z-[160] p-6 space-y-8 transform transition-transform duration-300 md:hidden ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex items-center justify-between">
           <span className="font-serif text-xl text-stone-900">Mirai</span>
