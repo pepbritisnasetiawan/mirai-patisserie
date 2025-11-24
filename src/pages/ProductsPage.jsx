@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ProductsPage = ({ products, onAddToCart, formatPrice, categories }) => {
+const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiveProduct }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [hideSoldOut, setHideSoldOut] = useState(false);
 
@@ -57,7 +57,7 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories }) => {
         {filteredProducts.length === 0 ? (
           <p className="text-center text-stone-500">No products match this category.</p>
         ) : (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div layout className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <AnimatePresence>
               {filteredProducts.map((product) => {
                 const soldOut = (product.stock ?? 0) <= 0;
@@ -69,14 +69,18 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories }) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.25 }}
-                    className="group bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col"
+                    onClick={() => setActiveProduct?.(product)}
+                    className="group bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col cursor-pointer"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden">
+                    <div className="relative aspect-[4/5] sm:aspect-[4/3] overflow-hidden">
                       <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       <div className="absolute top-3 left-3 flex flex-col gap-2">
                         <span className={`px-3 py-1 text-xs rounded-full bg-white/80 backdrop-blur ${product.accent}`}>{product.category}</span>
                         <span className={`px-3 py-1 text-[11px] rounded-full ${soldOut ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
                           {soldOut ? 'Sold out' : `${product.stock ?? 0} left`}
+                        </span>
+                        <span className="px-3 py-1 text-[11px] rounded-full bg-white/60 text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                          View details
                         </span>
                       </div>
                     </div>
@@ -91,7 +95,10 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories }) => {
                       <p className="text-xs text-stone-400">Stock: {product.stock ?? 0}</p>
                       <div className="flex gap-2 mt-auto">
                         <button
-                          onClick={() => !soldOut && onAddToCart(product)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!soldOut) onAddToCart(product);
+                          }}
                           disabled={soldOut}
                           className={`flex-1 py-2 rounded-lg text-sm uppercase tracking-[0.1em] transition-colors ${
                             soldOut
@@ -103,7 +110,10 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories }) => {
                         </button>
                         {!soldOut && (
                           <button
-                            onClick={() => onAddToCart(product)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAddToCart(product);
+                            }}
                             className="p-2 rounded-lg border border-stone-200 text-stone-600 hover:text-stone-900 hover:border-stone-300"
                             aria-label="Quick add"
                           >
