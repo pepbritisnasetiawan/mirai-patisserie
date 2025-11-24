@@ -57,7 +57,7 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiv
         {filteredProducts.length === 0 ? (
           <p className="text-center text-stone-500">No products match this category.</p>
         ) : (
-          <motion.div layout className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <motion.div layout className="grid grid-cols-2 max-[320px]:grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <AnimatePresence>
               {filteredProducts.map((product) => {
                 const soldOut = (product.stock ?? 0) <= 0;
