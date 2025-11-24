@@ -13,6 +13,7 @@ import ProductsPage from './pages/ProductsPage';
 import AdminPage from './pages/AdminPage';
 
 import { CATEGORIES, PRODUCTS } from './data/products';
+import { APP_CONFIG } from './config';
 import {
   fetchProducts,
   fetchReviews,
@@ -176,7 +177,7 @@ const HomePage = ({
           </div>
           <div className="flex md:justify-end">
             <a
-              href="https://wa.me/+62895404922012"
+              href={`https://wa.me/+${APP_CONFIG.whatsappNumber}`}
               target="_blank"
               rel="noreferrer noopener"
               className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors text-sm uppercase tracking-[0.2em]"
@@ -333,8 +334,8 @@ export default function App() {
     }
     return defaultReviews;
   });
-  const ADMIN_USER = 'admin';
-  const ADMIN_PASS = 'mirai123';
+  const ADMIN_USER = APP_CONFIG.adminUser;
+  const ADMIN_PASS = APP_CONFIG.adminPass;
   const [reviewForm, setReviewForm] = useState({ name: '', city: '', text: '', rating: 5 });
   const [adminToken, setAdminToken] = useState(() => localStorage.getItem('mirai_admin_token') || '');
   const apiReady = Boolean(import.meta.env.VITE_API_BASE);
@@ -445,8 +446,8 @@ export default function App() {
       pushToast('Product added');
     };
 
-    if (apiReady && adminToken) {
-      apiCreateProduct(payload, adminToken)
+    if (apiReady && (adminToken || adminAuthed)) {
+      apiCreateProduct(payload, adminToken || localStorage.getItem('mirai_admin_token'))
         .then((res) => saveLocal({ ...res }))
         .catch(() => {
           saveLocal({
@@ -480,8 +481,8 @@ export default function App() {
       );
       pushToast('Product updated');
     };
-    if (apiReady && adminToken) {
-      apiUpdateProduct(id, payload, adminToken).then(applyLocal).catch(applyLocal);
+    if (apiReady && (adminToken || adminAuthed)) {
+      apiUpdateProduct(id, payload, adminToken || localStorage.getItem('mirai_admin_token')).then(applyLocal).catch(applyLocal);
     } else {
       applyLocal();
     }
@@ -492,8 +493,8 @@ export default function App() {
       setProducts((prev) => prev.filter((p) => p.id !== id));
       pushToast('Product removed');
     };
-    if (apiReady && adminToken) {
-      apiDeleteProduct(id, adminToken).then(applyLocal).catch(applyLocal);
+    if (apiReady && (adminToken || adminAuthed)) {
+      apiDeleteProduct(id, adminToken || localStorage.getItem('mirai_admin_token')).then(applyLocal).catch(applyLocal);
     } else {
       applyLocal();
     }
@@ -696,6 +697,7 @@ export default function App() {
         items={cart}
         formatPrice={formatPrice}
         onSubmit={completeOrder}
+        whatsappNumber={APP_CONFIG.whatsappNumber}
       />
 
       <div className="fixed top-4 right-4 z-[120] space-y-2 pointer-events-none">

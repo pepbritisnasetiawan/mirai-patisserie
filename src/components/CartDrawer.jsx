@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Minus, Plus } from 'lucide-react';
 
 const CartDrawer = ({ isOpen, onClose, items, onRemove, onUpdateQty, formatPrice, onCheckout }) => {
   const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+  // Prevent background scrolling when cart is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save the original overflow style
+      const originalStyle = document.body.style.overflow;
+      // Lock scrolling
+      document.body.style.overflow = 'hidden';
+      
+      // cleanup function to restore scrolling when closed
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -15,7 +30,8 @@ const CartDrawer = ({ isOpen, onClose, items, onRemove, onUpdateQty, formatPrice
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-[60]"
+            // INCREASED z-index to 160 (higher than Navbar's 150)
+            className="fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-[160]"
           />
           <motion.div 
             key="cart-drawer"
@@ -23,9 +39,12 @@ const CartDrawer = ({ isOpen, onClose, items, onRemove, onUpdateQty, formatPrice
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-full w-full max-w-md bg-[#FDFBF7] z-[70] shadow-2xl border-l border-stone-100 flex flex-col"
+            // Added inline style for color safety
+            style={{ backgroundColor: '#FDFBF7' }}
+            // INCREASED z-index to 170 and added bg-white fallback
+            className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[170] shadow-2xl border-l border-stone-100 flex flex-col"
           >
-            <div className="p-6 border-b border-stone-200 flex justify-between items-center bg-white">
+            <div className="p-6 border-b border-stone-200 flex justify-between items-center bg-white/50">
               <h2 className="font-serif text-2xl text-stone-900">Your Selection</h2>
               <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-full">
                 <X className="w-6 h-6 text-stone-600" />
@@ -51,7 +70,7 @@ const CartDrawer = ({ isOpen, onClose, items, onRemove, onUpdateQty, formatPrice
                           <X className="w-4 h-4" />
                         </button>
                       </div>
-                  <p className="text-xs text-stone-500 mb-3">{formatPrice(item.price)}</p>
+                      <p className="text-xs text-stone-500 mb-3">{formatPrice(item.price)}</p>
                       
                       <div className="flex items-center gap-3 bg-white inline-flex rounded-full border border-stone-200 px-2 py-1">
                         <button 
@@ -75,7 +94,7 @@ const CartDrawer = ({ isOpen, onClose, items, onRemove, onUpdateQty, formatPrice
             </div>
 
             {items.length > 0 && (
-              <div className="p-6 border-t border-stone-200 bg-white">
+              <div className="p-6 border-t border-stone-200 bg-white/50">
                 <div className="flex justify-between items-center mb-6">
                   <span className="text-sm uppercase tracking-widest text-stone-500">Total</span>
                   <span className="font-serif text-2xl text-stone-900">{formatPrice(total)}</span>

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Loader2, CheckCircle2 } from 'lucide-react';
 
-const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit }) => {
+const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit, whatsappNumber }) => {
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -23,7 +23,7 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit }) => {
     setTimeout(() => {
       setStatus('success');
       setTimeout(() => {
-        const phoneTarget = '+62895404922012';
+        const phoneTarget = whatsappNumber || '+62895404922012';
         const lines = [
           'Halo Mirai, saya ingin memesan:',
           ...items.map(
