@@ -30,12 +30,12 @@ const ProductModal = ({ product, onClose, onAddToCart, formatPrice }) => {
         {/* Modal Container */}
         <motion.div 
           key="modal-content"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
-          className="relative w-full max-w-5xl bg-[#FDFBF7] rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] md:h-auto md:min-h-[500px]"
-        >
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+        className="relative w-full max-w-5xl bg-[#FDFBF7] rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[92vh] max-h-[92vh] md:h-auto md:max-h-[90vh] md:min-h-[500px] overscroll-contain"
+      >
           {/* Close Button - Floating */}
           <button 
             onClick={onClose}
