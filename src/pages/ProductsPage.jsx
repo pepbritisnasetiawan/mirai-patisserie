@@ -30,11 +30,10 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiv
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-xs uppercase tracking-[0.2em] border transition-colors ${
-                    selectedCategory === cat
+                  className={`px-4 py-2 rounded-full text-xs uppercase tracking-[0.2em] border transition-colors ${selectedCategory === cat
                       ? 'bg-stone-900 text-white border-stone-900 shadow-sm'
                       : 'bg-white text-stone-600 border-stone-200 hover:border-stone-300'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>
@@ -111,11 +110,10 @@ const ProductsPage = ({ products, onAddToCart, formatPrice, categories, setActiv
                             if (!soldOut) onAddToCart(product);
                           }}
                           disabled={soldOut}
-                          className={`flex-1 py-2 rounded-lg text-sm uppercase tracking-[0.1em] transition-colors ${
-                            soldOut
-                              ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
-                              : 'bg-stone-900 text-white hover:bg-rose-500'
-                          }`}
+                          className={`px-4 py-2 rounded-lg text-xs uppercase tracking-[0.1em] transition-colors ${soldOut
+                            ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
+                            : 'bg-stone-900 text-white hover:bg-rose-500'
+                            }`}
                         >
                           {soldOut ? 'Sold Out' : 'Add to Cart'}
                         </button>

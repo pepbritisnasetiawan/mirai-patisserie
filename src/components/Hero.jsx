@@ -19,9 +19,9 @@ const Hero = () => {
 
   const [heroIndex, setHeroIndex] = useState(0);
   const { scrollY } = useScroll();
-  
+
   // Parallax effects
-  const y = useTransform(scrollY, [0, 500], [0, 150]); 
+  const y = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   const activeImage = heroImages[heroIndex];
@@ -36,18 +36,18 @@ const Hero = () => {
   }, [heroImages.length]);
 
   return (
-    <section id="hero" className="relative h-screen min-h-[700px] overflow-hidden flex items-center justify-center bg-stone-900">
-      
+    <section id="hero" className="relative h-[100dvh] min-h-[600px] overflow-hidden flex items-center justify-center bg-stone-900">
+
       {/* CONTAINER FOR PARALLAX 
         We apply the scroll Y and Scroll Opacity here to the container, 
         instead of the individual images, to prevent jitter.
       */}
-      <motion.div 
+      <motion.div
         style={{ y, opacity }}
         className="absolute inset-0 z-0"
       >
         <div className="absolute inset-0 bg-stone-900/20 z-10 mix-blend-multiply pointer-events-none" />
-        
+
         {/* ANIMATE PRESENCE 
           This is the key to the smooth transition. It allows the exiting component
           to remain in the DOM until its 'exit' animation finishes.
@@ -57,18 +57,18 @@ const Hero = () => {
             key={heroIndex} // Changing key triggers the exit/enter
             src={activeImage.src}
             alt={activeImage.alt}
-            
+
             // Animation States
             initial={{ opacity: 0, scale: 1.1 }} // Start slightly zoomed out and invisible
             animate={{ opacity: 1, scale: 1 }}   // Fade in and settle
             exit={{ opacity: 0 }}                // Fade out when removed
-            
+
             // Transition Settings
-            transition={{ 
+            transition={{
               duration: 1.5, // Long duration for smoothness
-              ease: "easeInOut" 
+              ease: "easeInOut"
             }}
-            
+
             className="absolute inset-0 w-full h-full object-cover"
           />
         </AnimatePresence>
@@ -84,15 +84,15 @@ const Hero = () => {
           <span className="inline-block py-1 px-3 border border-white/30 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs tracking-[0.2em] uppercase mb-6">
             Wonosobo • Jogja • Jakarta
           </span>
-          <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-[1.1]">
-            The Art of <br/>
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-[1.1]">
+            The Art of <br />
             <span className="italic font-light">Delicate Layers</span>
           </h2>
           <p className="text-white/90 text-lg md:text-xl font-light max-w-xl mx-auto mb-10 leading-relaxed">
             Mirai bridges traditional French technique with modern Japanese precision. Sweetness is not the goal—balance is.
           </p>
-          
-          <motion.button 
+
+          <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="bg-white text-stone-900 px-8 py-4 rounded-full text-sm tracking-widest uppercase font-medium hover:bg-stone-100 transition-colors shadow-lg shadow-black/20"
