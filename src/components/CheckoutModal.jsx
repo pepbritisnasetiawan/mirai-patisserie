@@ -67,7 +67,7 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit, whatsapp
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-stone-900/30 backdrop-blur-sm z-[80]"
+            className="fixed inset-0 bg-stone-900/30 backdrop-blur-sm z-[200]"
           />
           <motion.div
             key="checkout-modal"
@@ -75,7 +75,7 @@ const CheckoutModal = ({ isOpen, onClose, items, formatPrice, onSubmit, whatsapp
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 30, opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed inset-0 md:inset-12 lg:inset-20 z-[90] flex items-center justify-center p-3 md:p-4"
+            className="fixed inset-0 md:inset-12 lg:inset-20 z-[210] flex items-center justify-center p-3 md:p-4"
             role="dialog"
             aria-modal="true"
           >
